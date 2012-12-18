@@ -76,8 +76,9 @@
 		     :sw t :double-buffer t 
 		     :title-caption (window-title game)
 		     :fps (make-instance 'sdl:fps-fixed))
-;	 (setf (slot-value game 'surface) sdl:*default-surface*)
+	 (setf (slot-value game 'surface) sdl:*default-surface*)
 	 (setf (sdl:frame-rate) nil)
+	 (sdl:enable-key-repeat nil nil)
 	 (initialize-data game))
 	(t
 	 (error "Error initialized SDL")

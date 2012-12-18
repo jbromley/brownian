@@ -16,10 +16,11 @@
    (world :reader world :initarg :world 
 	  :initform (error "Must specify particle's world."))))
 
-(defun make-particle (x y border-color world)
+(defun make-particle (x y radius particle-speed border-color world)
   (let ((fill-color (lighten-color border-color 0.5))
 	(heading (random-heading)))
-    (make-instance 'particle :x x :y y :heading heading 
+    (make-instance 'particle :x x :y y :radius radius 
+		   :particle-speed particle-speed :heading heading 
 		   :border-color border-color :fill-color fill-color
 		   :world world)))
 
@@ -66,10 +67,13 @@
 	   (setf y (- radius))))))))
 
   (defmethod render ((p particle))
-    (with-slots (x y radius fill-color border-color) p
+    (with-slots (x y radius heading fill-color border-color) p
       (let ((x-int (round x))
-	    (y-int (round y)))
-	(sdl:draw-circle-* x-int y-int radius :color border-color)
-	(sdl:draw-filled-circle-* x-int y-int radius :color fill-color))))
+	    (y-int (round y))
+	    (x1 (round (+ x (* radius (cos heading)))))
+	    (y1 (round (+ y (* radius (sin heading))))))
+	(sdl:draw-circle-* x-int y-int radius :color border-color :aa t)
+	(sdl:draw-filled-circle-* x-int y-int radius :color fill-color)
+	(sdl:draw-line-* x-int y-int x1 y1 :color sdl:*white* :aa t))))
   
   

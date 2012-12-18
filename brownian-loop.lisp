@@ -4,6 +4,10 @@
 
 (defclass brownian-loop (game-loop)
   ((particles :accessor particles :initform '())
+   (particle-speed :accessor particle-speed :initarg :particle-speed 
+		   :initform 64.0)
+   (particle-radius :accessor particle-radius :initarg :particle-radius
+		    :initform 16)
    (font :accessor font :initform nil)
    (text-color :accessor text-color :initarg :text-color :initform sdl:*white*)
    (show-stats :accessor show-stats :initform nil)))
@@ -50,6 +54,26 @@
       ((sdl:key= key-code :sdl-key-w)
        (setf background-color sdl:*white*)
        (setf text-color sdl:*black*))
+      ((sdl:key= key-code :sdl-key-1)
+       (with-slots ((r particle-radius)) game
+	 (decf r)
+	 (when (< r 4)
+	   (setf r 4))))
+      ((sdl:key= key-code :sdl-key-2)
+       (with-slots ((r particle-radius)) game
+	 (incf r)
+	 (when (> r 64)
+	   (setf r 64))))
+      ((sdl:key= key-code :sdl-key-3)
+       (with-slots ((s particle-speed)) game
+	 (decf s)
+	 (when (< s 2.0)
+	   (setf s 2.0))))
+      ((sdl:key= key-code :sdl-key-4)
+       (with-slots ((s particle-speed)) game
+	 (incf s)
+	 (when (> s 128.0)
+	   (setf s 128.0))))
       (t nil))))
 
 (defmethod key-up ((game game-loop) key-code)
@@ -70,15 +94,17 @@
 (defun render-statistics (game)
   (declare (type brownian-loop game))
   (with-slots (particles current-fps window-height font text-color) game
-    (let ((stat-text (format nil "~a particles, ~a fps" (length particles) 
-			     current-fps)))
+    (let ((stat-text (format nil "~a particles, radius ~a, speed ~a, ~a fps" 
+			     (length particles) (particle-radius game)
+			     (particle-speed game) current-fps)))
       (sdl:draw-string-blended-* stat-text 16 (- window-height 18) 
 				 :font font :color text-color))))
 
 (defun add-particle (game x y)
   (declare (type brownian-loop game))
   (let ((border-color (random-base-color)))
-    (pushnew (make-particle x y border-color game) (particles game))))
+    (with-slots ((r particle-radius) (s particle-speed)) game
+      (pushnew (make-particle x y r s border-color game) (particles game)))))
 
 (defun font-example ()
   (sdl:with-init ()
