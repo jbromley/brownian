@@ -12,7 +12,6 @@
 	       (:file "color-utils")
 	       (:file "game-loop")
 	       (:file "particle" :depends-on ("color-utils"))
-	       (:file "brownian-loop" 
-		      :depends-on ("game-loop" "color-utils" "particle"))
+	       (:file "brownian-loop" :depends-on ("game-loop" "particle"))
                (:file "brownian" :depends-on ("brownian-loop"))))
 
