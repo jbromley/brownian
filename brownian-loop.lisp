@@ -59,7 +59,7 @@
   (declare (ignore game button-state x y dx dy)))
 
 (defmethod mouse-button-down ((game game-loop) button x y)
-  (if (eq button :sdl-button-left)
+  (if (= button 1)
       (add-particle game x y)
       (dotimes (i 100)
 	(add-particle game x y))))
