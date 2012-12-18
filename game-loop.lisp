@@ -119,20 +119,14 @@
     (:mouse-button-up-event (:button button :x x :y y)
     			    (mouse-button-up game button x y))
     (:active-event (:state state :gain gain)
-		   (format t "active-event :state ~a, :gain ~a, active-p ~a, active-gain-p ~a~%" state gain (sdl:active-p state) (sdl:active-gain-p gain state))
-		   (finish-output)
-
-    		   (cond
-    		     ((equal (sdl:active-gain-p state) t)
-		      (format t "game loop is active: ~a~%" state)
-		      (finish-output)
-    		      (setf (minimized game) nil)
-    		      (window-active game))
-    		     (t
-		      (format t "game loop is inactive: ~a~%" state)
-		      (finish-output)
-    		      (setf (minimized game) t)
-    		      (window-inactive game))))
+		   (when (sdl:active-p state)
+		       (cond
+			 ((= gain 1)
+			  (setf (minimized game) nil)
+			  (window-active game))
+			 (t
+			  (setf (minimized game) t)
+			  (window-inactive game)))))
     (:idle () 
 	   (unless (minimized game)
 	     (do-update game)
