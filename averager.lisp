@@ -4,7 +4,7 @@
 (in-package #:brownian)
 
 (defclass averager ()
-  ((alpha :reader alpha :initarg :alpha :type 'float)
+  ((alpha :accessor alpha :initarg :alpha :type 'float)
    (average :accessor average :initform 0.0)))
 
 (defgeneric update (averager number)

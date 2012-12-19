@@ -11,6 +11,8 @@
    (font :accessor font :initform nil)
    (text-color :accessor text-color :initarg :text-color :initform sdl:*white*)
    (use-averaging :accessor use-averaging :initarg :use-averaging :initform t)
+   (averaging-alpha :accessor averaging-alpha :initarg :averaging-alpha 
+		  :initform 0.25)
    (show-stats :accessor show-stats :initform nil)))
 
 (defmethod initialize-data ((game brownian-loop))
@@ -78,10 +80,24 @@
 	 (incf s)
 	 (when (> s 128.0)
 	   (setf s 128.0))))
+      ((sdl:key= key-code :sdl-key-5)
+       (with-slots ((aa averaging-alpha)) game
+	 (decf aa 0.01)
+	 (when (< aa 0.0)
+	   (setf aa 0.0))))
+      ((sdl:key= key-code :sdl-key-6)
+       (with-slots ((aa averaging-alpha)) game
+	 (incf aa 0.01)
+	 (when (> aa 1.0)
+	   (setf aa 1.0))))
       (t nil))))
 
 (defmethod key-up ((game game-loop) key-code)
-  (declare (ignore game key-code)))
+  (with-slots ((aa averaging-alpha) particles) game
+    (cond
+      ((or (sdl:key= key-code :sdl-key-5)
+	   (sdl:key= key-code :sdl-key-6))
+       (mapc (lambda (p) (setf (alpha (averager p)) aa)) particles)))))
 
 (defmethod mouse-moved ((game game-loop) button-state x y dx dy)
   (declare (ignore game button-state x y dx dy)))
@@ -98,12 +114,13 @@
 (defun render-statistics (game)
   (declare (type brownian-loop game))
   (with-slots (particles particle-radius particle-speed use-averaging
-			 current-fps window-height font text-color) game
+			 averaging-alpha current-fps window-height font 
+			 text-color) game
     (let ((stat-text 
 	   (format nil 
-		   "~a particles, radius ~a, speed ~a, averaging ~a, ~a fps" 
+		   "~a particles, radius ~a, speed ~a, averaging ~a, alpha ~,2f, ~a fps" 
 		   (length particles) particle-radius particle-speed 
-		   use-averaging current-fps)))
+		   use-averaging averaging-alpha current-fps)))
       (sdl:draw-string-blended-* stat-text 16 (- window-height 20) 
 				 :font font :color text-color))))
 
@@ -112,31 +129,3 @@
   (let ((border-color (random-base-color)))
     (with-slots ((r particle-radius) (s particle-speed)) game
       (pushnew (make-particle x y r s border-color game) (particles game)))))
-
-(defun font-example ()
-  (sdl:with-init ()
-    (sdl:window 320 320 
-		:title-caption "SDL-TTF Font Example" 
-		:icon-caption "SDL-TTF Font Example")
-    (setf (sdl:frame-rate) 30)
-    (sdl:fill-surface sdl:*black* :surface sdl:*default-display*)
-    (let ((ttf-arial-16 (make-instance 'sdl:ttf-font-definition :size 16
-				       :filename (merge-pathnames "arial.ttf" *default-pathname-defaults*))))
-      (unless (sdl:initialise-default-font ttf-arial-16)
-	  (error "FONT-EXAMPLE: Cannot initialize the default font.")))
-    (sdl:set-font-style :style-bold :font sdl:*default-font*)
-    (let ((orange (sdl:color :r 255 :g 165 :b 0)))
-      (sdl:draw-string-solid-* "Text UTF8 - Solid" 0 50
-                             :color orange)
-      (sdl:draw-string-shaded-* "Text UTF8 - Shaded" 0 150 sdl:*black* 
-				orange)
-      (sdl:draw-string-blended-* "Text UTF8 - Blended" 0 250
-				 :color orange))
-
-    (sdl:update-display)
-    (sdl:with-events ()
-      (:quit-event () t)
-      (:video-expose-event () (sdl:update-display))
-      (:key-down-event ()
-       (when (sdl:key-down-p :sdl-key-escape)
-         (sdl:push-quit-event))))))
