@@ -10,9 +10,11 @@
 		    :initform 16)
    (font :accessor font :initform nil)
    (text-color :accessor text-color :initarg :text-color :initform sdl:*white*)
+   (use-averaging :accessor use-averaging :initarg :use-averaging :initform t)
    (show-stats :accessor show-stats :initform nil)))
 
 (defmethod initialize-data ((game brownian-loop))
+  (setf *random-state* (make-random-state t))
   (sdl-ttf:init-ttf)
   (let ((arial-16 (make-instance 'sdl:ttf-font-definition :size 16
 				 :filename (merge-pathnames "arial.ttf" *default-pathname-defaults*))))
@@ -44,6 +46,8 @@
 (defmethod key-down ((game game-loop) key-code)
   (with-slots (background-color text-color particles show-stats) game
     (cond
+      ((sdl:key= key-code :sdl-key-a)
+       (setf (use-averaging game) (not (use-averaging game))))
       ((sdl:key= key-code :sdl-key-b)
        (setf background-color sdl:*black*)
        (setf text-color sdl:*white*))
@@ -93,11 +97,14 @@
 
 (defun render-statistics (game)
   (declare (type brownian-loop game))
-  (with-slots (particles current-fps window-height font text-color) game
-    (let ((stat-text (format nil "~a particles, radius ~a, speed ~a, ~a fps" 
-			     (length particles) (particle-radius game)
-			     (particle-speed game) current-fps)))
-      (sdl:draw-string-blended-* stat-text 16 (- window-height 18) 
+  (with-slots (particles particle-radius particle-speed use-averaging
+			 current-fps window-height font text-color) game
+    (let ((stat-text 
+	   (format nil 
+		   "~a particles, radius ~a, speed ~a, averaging ~a, ~a fps" 
+		   (length particles) particle-radius particle-speed 
+		   use-averaging current-fps)))
+      (sdl:draw-string-blended-* stat-text 16 (- window-height 20) 
 				 :font font :color text-color))))
 
 (defun add-particle (game x y)

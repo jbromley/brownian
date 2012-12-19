@@ -10,8 +10,9 @@
                #:lispbuilder-sdl-ttf)
   :components ((:file "package")
 	       (:file "color-utils")
+	       (:file "averager")
 	       (:file "game-loop")
-	       (:file "particle" :depends-on ("color-utils"))
+	       (:file "particle" :depends-on ("color-utils" "averager"))
 	       (:file "brownian-loop" :depends-on ("game-loop" "particle"))
                (:file "brownian" :depends-on ("brownian-loop"))))
 
