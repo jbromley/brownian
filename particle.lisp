@@ -51,8 +51,6 @@
 			   :world world)))
     (setf (average (averager p)) heading)
     p))
-	 
-
 
 (defmethod update ((p particle) elapsed-time)
   (with-slots (x y radius heading particle-speed world) p
@@ -84,6 +82,6 @@
 	    (y1 (round (+ y (* radius (sin heading))))))
 	(sdl:draw-circle-* x-int y-int radius :color border-color :aa t)
 	(sdl:draw-filled-circle-* x-int y-int radius :color fill-color)
-	(sdl:draw-line-* x-int y-int x1 y1 :color sdl:*white* :aa t))))
+	(sdl:draw-line-* x-int y-int x1 y1 :color border-color :aa t))))
   
   
