@@ -18,8 +18,10 @@
 (defmethod initialize-data ((game brownian-loop))
   (setf *random-state* (make-random-state t))
   (sdl-ttf:init-ttf)
-  (let ((arial-16 (make-instance 'sdl:ttf-font-definition :size 16
-				 :filename (merge-pathnames "arial.ttf" *default-pathname-defaults*))))
+  (let* ((arial-path (merge-pathnames "arial.ttf"
+				      (asdf:system-source-directory :brownian)))
+	 (arial-16 (make-instance 'sdl:ttf-font-definition :size 16
+				  :filename arial-path)))
     (setf (font game) (sdl:initialise-font arial-16))
     (if (font game)
 	(sdl:set-font-style :style-bold :font (font game))
